@@ -13,7 +13,6 @@ class Scheduler:
 		self.lThreads = []
 		self.pause = False
 		self.autoclean()
-		self.__lock_delay = threading.Lock()
 
 	def autoclean(self):
 		logger.debug("Current number of threads: %d" % threading.active_count())
@@ -34,21 +33,19 @@ class Scheduler:
 		t.setDaemon(True)
 		t.setName(str(function))
 		k[1] = t
-		t.delayed = True
 		t.start()
 		self.lThreads.append(t)
 
 	def dispatch(self, function, timer, args, kwargs):
+		timer.timeup = True
 		while True:
-			with self.__lock_delay:
-				still_running = False
-				for t in self.lThreads:
-					if t.name == str(function) and t.isAlive() and t.ident != timer.ident and not t.delayed:
-						still_running = True
-						break
-				if not still_running:
-					t.delayed = False
+			still_running = False
+			for t in self.lThreads:
+				if t.name == str(function) and t.isAlive() and t.ident != timer.ident:
+					still_running = True
 					break
+			if not still_running:
+				break
 			logger.debug("Delaying execution of Thread %s", t.name)
 			# Another Thread still running, delay execution
 			sleep(0.1)
