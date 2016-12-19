@@ -106,3 +106,50 @@ class BP:
 			raise Exception("Bad I/O pin")
 		state = self.update_io()
 		return state & (1 << dPinToBit[pin])
+
+	def mode_i2c(self, bEnablePower=False, bEnablePullup=False):
+		if self.command(chr(0x2), 4) != "I2C1":
+			raise Exception()
+
+		# 100kHz
+		ret = self.command(chr(0b01100010), 1)
+		if ord(ret) != 0x1:
+			raise Exception()
+
+		periphals = 0b01000000
+		if bEnablePower:
+			periphals |= (1<<3)
+		if bEnablePullup:
+			periphals |= (1<<2)
+		ret = self.command(chr(periphals), 1)
+		if ord(ret) != 0x1:
+			raise Exception()
+
+	def i2c_write(self, addr, reg, s):
+		# 1. Write
+		# command (1) | number of write bytes (2) | number of read bytes (2) | bytes to write (0..)
+		msg = struct.pack(">BHHBB%ds" % len(s), 0x08, 2+len(s), 0, addr<<1, reg, s)
+		ret = self.command(msg, 1)
+
+		if ord(ret[0]) != 0x1:
+			raise Exception("I2C write error")
+
+	def i2c_read(self, addr, reg, num_read):
+		# set reg
+		self.i2c_write(addr, reg, "")
+
+		# command (1) | number of write bytes (2) | number of read bytes (2) | bytes to write (0..)
+		msg = struct.pack(">BHHB", 0x08, 1, 1+num_read, (addr<<1) | 0x1)
+		ret = self.command(msg, 1 + num_read)
+
+		if ord(ret[0]) != 0x1:
+			raise Exception("I2C read error")
+
+		return ret[1:]
+
+	def i2c_search(self):
+		for i in range(128):
+			msg = struct.pack(">BHHB", 0x08, 1, 1, i<<1)
+			ret = self.command(msg, 1)
+			if ord(ret) == 0x1:
+				print "Found I2C Addr: 0x%x" % (i & ~0x1)
