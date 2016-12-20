@@ -107,12 +107,19 @@ class BP:
 		state = self.update_io()
 		return state & (1 << dPinToBit[pin])
 
-	def mode_i2c(self, bEnablePower=False, bEnablePullup=False):
+	def mode_i2c(self, bEnablePower=False, bEnablePullup=False, iSpeedkHz=100):
 		if self.command(chr(0x2), 4) != "I2C1":
 			raise Exception()
 
-		# 100kHz
-		ret = self.command(chr(0b01100010), 1)
+		dSpeeds = {
+			5: 0x0,
+			50: 0x1,
+			100: 0x2,
+			400: 0x3,
+		}
+		if iSpeedkHz not in dSpeeds.keys():
+			raise Exception("Invalid I2C speed")
+		ret = self.command(chr(0b01100000 | dSpeeds[iSpeedkHz]), 1)
 		if ord(ret) != 0x1:
 			raise Exception()
 
