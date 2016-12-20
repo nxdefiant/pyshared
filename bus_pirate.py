@@ -139,7 +139,7 @@ class BP:
 		self.i2c_write(addr, reg, "")
 
 		# command (1) | number of write bytes (2) | number of read bytes (2) | bytes to write (0..)
-		msg = struct.pack(">BHHB", 0x08, 1, 1+num_read, (addr<<1) | 0x1)
+		msg = struct.pack(">BHHB", 0x08, 1, num_read, (addr<<1) | 0x1)
 		ret = self.command(msg, 1 + num_read)
 
 		if ord(ret[0]) != 0x1:
