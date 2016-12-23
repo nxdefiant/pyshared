@@ -135,7 +135,7 @@ class BP:
 	def i2c_write(self, addr, reg, s):
 		# 1. Write
 		# command (1) | number of write bytes (2) | number of read bytes (2) | bytes to write (0..)
-		msg = struct.pack(">BHHBB%ds" % len(s), 0x08, 2+len(s), 0, addr<<1, reg, s)
+		msg = struct.pack(">BHHBB%ds" % len(s), 0x08, 2+len(s), 0, addr, reg, s)
 		ret = self.command(msg, 1)
 
 		if ord(ret[0]) != 0x1:
@@ -146,7 +146,7 @@ class BP:
 		self.i2c_write(addr, reg, "")
 
 		# command (1) | number of write bytes (2) | number of read bytes (2) | bytes to write (0..)
-		msg = struct.pack(">BHHB", 0x08, 1, num_read, (addr<<1) | 0x1)
+		msg = struct.pack(">BHHB", 0x08, 1, num_read, addr | 0x1)
 		ret = self.command(msg, 1 + num_read)
 
 		if ord(ret[0]) != 0x1:
@@ -156,7 +156,7 @@ class BP:
 
 	def i2c_search(self):
 		for i in range(128):
-			msg = struct.pack(">BHHB", 0x08, 1, 1, i<<1)
+			msg = struct.pack(">BHHB", 0x08, 1, 1, i)
 			ret = self.command(msg, 1)
 			if ord(ret) == 0x1:
 				print "Found I2C Addr: 0x%x" % (i & ~0x1)
