@@ -58,7 +58,7 @@ def check_ventilate(temp_indoor, humdity_rel_indoor):
 	humdity_abs_outdoor = calc_humidity_abs(temp_outdoor, humdity_rel_outdoor)
 
 	print "Wassergehalt Innen: %.2f, Auﬂen: %.2f" % (humdity_abs_indoor, humdity_abs_outdoor)
-	return humdity_abs_indoor - humdity_abs_outdoor
+	return humdity_abs_indoor/humdity_abs_outdoor
 
 
 if __name__ == "__main__":
