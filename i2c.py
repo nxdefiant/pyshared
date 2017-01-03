@@ -57,11 +57,8 @@ class i2c:
 			self.dev = None
 			i2c.__single = None
 
-	def __del__(self):
-		self.close()
 
-
-def i2c_write_reg(addr, reg, buf):
+def i2c_write_reg(addr, reg, buf=""):
 	dev = i2c(addr)
 	s = struct.pack(">B", reg) + buf
 	dev.write(s)
@@ -69,9 +66,9 @@ def i2c_write_reg(addr, reg, buf):
 
 
 def i2c_read_reg(addr, reg, num=1):
+	i2c_write_reg(addr, reg)
+
 	dev = i2c(addr)
-	s = struct.pack(">B", reg)
-	dev.write(s)
 	s = dev.read(num)
 	dev.close()
 	return s
