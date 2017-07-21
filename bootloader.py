@@ -192,3 +192,7 @@ if __name__ == "__main__":
 		loader = bootloader(addr)
 		if len(args) > 1:
 			loader.load(args[1])
+		if options.bJump:
+			print "Jump:"
+			loader.jump(0x0)
+
