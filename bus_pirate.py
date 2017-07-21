@@ -64,6 +64,29 @@ class BP:
 		v = struct.unpack(">h", s)
 		return v[0]/1024.0*6.6
 
+	# http://codepad.org/qtYpZmIF
+	def pwm(self, freq, duty_cycle):
+		lPrescaler = {0:1, 1:8 , 2:64, 3:256}
+		Fosc = 32e6
+		Tcy = 2.0 / Fosc
+		period = 1.0 / freq
+		prescaler = 1
+
+		# find needed prescaler
+		for i in range(4):
+			prescaler = lPrescaler[i]
+			PRy = period * 1.0 / (Tcy * prescaler)
+			PRy = int(PRy - 1)
+			OCR = int(PRy * duty_cycle)
+
+			if PRy < (2 ** 16 - 1):
+				break # valid value for PRy, keep values
+
+		cmd = struct.pack(">BBHH", 0b00010010, prescaler, duty_cycle, period)
+		ret = self.command(cmd, 1)
+		if ord(ret) != 0x1:
+			raise Exception()
+
 	def spi_command(self, cmd):
 		ret = self.command(cmd, 1)
 		if ord(ret) != 0x1:

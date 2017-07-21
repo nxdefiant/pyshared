@@ -179,9 +179,12 @@ if __name__ == "__main__":
 	usage = "usage: %prog [options] addr [ihex]"
 	parser = OptionParser(usage=usage)
 	parser.add_option("-b", "--start-bootloader", action="store_true", dest="bToBoot", default=False, help="Start Bootloader")
+	parser.add_option("-j", "--jump", action="store_true", dest="bJump", default=False, help="Jump to Program")
 
 	(options, args) = parser.parse_args()
-	if len(args) > 0:
+	if not args:
+		print "Missing Address"
+	else:
 		addr = int(args[0], 16)
 		if options.bToBoot:
 			to_bootloader(addr)
