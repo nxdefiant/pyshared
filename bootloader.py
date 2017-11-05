@@ -92,7 +92,6 @@ class bootloader:
 				self.boot_addr = int(data.encode("hex"), 16)
 			elif typ == 1: # End of File Record
 				print "Addr (rest) 0x%x" % buf_addr
-				buf_addr+=self.pagesize
 				diff = self.pagesize-len(buf)
 				buf+=chr(0xff)*diff # fill with 0xff
 				handle(buf_addr, buf[:self.pagesize])
@@ -133,8 +132,6 @@ class bootloader:
 		t1 = time()
 		self.compare(filename)
 		print "Time: %.1fs" % (time() - t1)
-		print "Jump:"
-		self.jump(self.boot_addr)
 
 	def write(self, s):
 		dev = i2c(self.i2c_addr)
@@ -193,6 +190,5 @@ if __name__ == "__main__":
 		if len(args) > 1:
 			loader.load(args[1])
 		if options.bJump:
-			print "Jump:"
+			print "Jump to Program"
 			loader.jump(0x0)
-
