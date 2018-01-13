@@ -65,7 +65,7 @@ class BP:
 		return v[0]/1024.0*6.6
 
 	# http://codepad.org/qtYpZmIF
-	def pwm(self, freq, duty_cycle):
+	def pwm(self, freq, duty_cycle_percent):
 		lPrescaler = {0:1, 1:8 , 2:64, 3:256}
 		Fosc = 32e6
 		Tcy = 2.0 / Fosc
@@ -77,12 +77,12 @@ class BP:
 			prescaler = lPrescaler[i]
 			PRy = period * 1.0 / (Tcy * prescaler)
 			PRy = int(PRy - 1)
-			OCR = int(PRy * duty_cycle)
+			OCR = int(PRy * duty_cycle_percent)
 
 			if PRy < (2 ** 16 - 1):
 				break # valid value for PRy, keep values
 
-		cmd = struct.pack(">BBHH", 0b00010010, prescaler, duty_cycle, period)
+		cmd = struct.pack(">BBHH", 0b00010010, i, OCR, PRy)
 		ret = self.command(cmd, 1)
 		if ord(ret) != 0x1:
 			raise Exception()
